@@ -1,0 +1,65 @@
+services:
+  postgres:
+    container_name: postgres-sql-movie
+    image: postgres:latest
+    environment:
+      POSTGRES_USER: username
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: movie_db
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres:/var/lib/postgres/data
+    networks:
+      - movie-app-network
+
+  smtp4dev:
+    container_name: smtp4dev
+    image: rnwood/smtp4dev:v3
+    restart: always
+    ports:
+      - "5000:80" # Web UI accessible on http://localhost:5000
+      - "25:25" # SMTP server port
+      - "143:143" # IMAP server port (optional)
+    volumes:
+      - smtp4dev-data:/smtp4dev
+    environment:
+      - ServerOptions__Urls=http://*:80
+      - ServerOptions__HostName=smtp4dev
+    networks:
+      - movie-app-network
+
+  spring-boot-app:
+    container_name: spring-backend-movie
+    build:
+      context: ./backend/movie-app
+      dockerfile: Dockerfile
+    env_file:
+      - ./backend/movie-app/.env
+    ports:
+      - "8080:8080"
+    networks:
+      - movie-app-network
+    depends_on:
+      - postgres
+      - smtp4dev
+
+  movie_frontend:
+    container_name: react-frontend-movie
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    env_file:
+      - ./frontend/movie-app/.env
+    ports:
+      - "5173:5173"
+    networks:
+      - movie-app-network
+
+volumes:
+  postgres:
+  smtp4dev-data:
+
+networks:
+  movie-app-network:
+    driver: bridge
