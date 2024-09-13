@@ -9,7 +9,13 @@ import com.dimon.movieapp.exceptions.EmailNotFoundException;
 import com.dimon.movieapp.exceptions.UserAlreadyExistsException;
 import com.dimon.movieapp.exceptions.UserNotVerifiedException;
 import com.dimon.movieapp.models.LocalUser;
+import com.dimon.movieapp.repositories.LocalUserRepository;
+import com.dimon.movieapp.services.JWTService;
 import com.dimon.movieapp.services.UserService;
+import com.google.api.client.googleapis.auth.oauth2.GoogleIdToken;
+import com.google.api.client.googleapis.auth.oauth2.GoogleIdTokenVerifier;
+import com.google.api.client.http.javanet.NetHttpTransport;
+import com.google.api.client.json.jackson2.JacksonFactory;
 import jakarta.validation.Valid;
 import org.apache.coyote.Response;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,17 +25,26 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.web.bind.annotation.*;
 
+import java.io.IOException;
+import java.security.GeneralSecurityException;
 import java.util.Collections;
+import java.util.Map;
+import java.util.Optional;
 
 @RestController
 @RequestMapping("/auth")
 public class AuthenticationController {
 
+    private final LocalUserRepository localUserRepository;
     private UserService userService;
+    private JWTService jwtService;
+    private static final String CLIENT_ID = "853926160324-e2hab7pkqlh5jnjqlbaoa6v1ju1iujp4.apps.googleusercontent.com";
 
     @Autowired
-    public AuthenticationController(UserService userService) {
+    public AuthenticationController(UserService userService, LocalUserRepository localUserRepository, JWTService jwtService) {
         this.userService = userService;
+        this.localUserRepository = localUserRepository;
+        this.jwtService = jwtService;
     }
 
     @PostMapping("/register")
@@ -44,6 +59,45 @@ public class AuthenticationController {
         } catch (EmailFailureException e) {
             System.out.println("Email Failure Exception");
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
+    }
+
+    @PostMapping("/google")
+    public ResponseEntity<?> authenticateWithGoogle(@RequestBody Map<String, String> request) {
+        String googleToken = request.get("token");
+
+        GoogleIdTokenVerifier verifier = new GoogleIdTokenVerifier.Builder(new NetHttpTransport(), JacksonFactory.getDefaultInstance())
+                .setAudience(Collections.singletonList(CLIENT_ID)) // Set your Google client ID here
+                .build();
+
+        try {
+            GoogleIdToken idToken = verifier.verify(googleToken);
+            if (idToken != null) {
+                GoogleIdToken.Payload payload = idToken.getPayload();
+
+                String email = payload.getEmail();
+                String name = (String) payload.get("name");
+
+                // Check if the user exists in the database, and if not, create a new user
+                // Assuming userService manages your user logic
+                Optional<LocalUser> optionalUser = localUserRepository.findByEmailIgnoreCase(email);
+                LocalUser user = optionalUser.orElseGet(() -> {
+                    LocalUser newUser = new LocalUser();
+                    newUser.setEmail(email);
+                    newUser.setUsername(name);
+                    newUser.setEmailVerified(true); // Google already verifies email
+                    return localUserRepository.save(newUser);
+                });
+
+                // Generate JWT for the user
+                String jwt = jwtService.generateJWT(user);
+                return ResponseEntity.ok(Map.of("jwt", jwt));
+            } else {
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid Google token");
+            }
+        } catch (GeneralSecurityException | IOException e) {
+            e.printStackTrace();
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Google token verification failed");
         }
     }
 

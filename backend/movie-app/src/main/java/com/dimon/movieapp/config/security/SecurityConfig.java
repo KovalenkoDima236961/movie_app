@@ -43,6 +43,7 @@ public class SecurityConfig {
                         auth.requestMatchers("/auth/me").authenticated().
                         requestMatchers("/api/addwatchlist", "/api/inwatchlist/**", "/api/removewatchlist/**").authenticated().
                         requestMatchers("/api/watchlist").authenticated().
+                        requestMatchers("/reviews/add").authenticated().
                                 anyRequest().permitAll())
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS));
 

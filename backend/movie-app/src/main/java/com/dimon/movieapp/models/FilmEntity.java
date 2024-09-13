@@ -9,7 +9,9 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 @Entity
@@ -53,6 +55,9 @@ public class FilmEntity {
     @JsonIgnore
     @ManyToMany(mappedBy = "watchlist")
     private Set<LocalUser> users = new HashSet<>();
+
+    @OneToMany(mappedBy = "film", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Review> reviews = new ArrayList<>();
 
     public FilmEntity() {
         this.users = new HashSet<>();

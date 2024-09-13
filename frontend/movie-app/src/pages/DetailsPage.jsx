@@ -19,6 +19,7 @@ import {
   checkIfInWatchlist,
   fetchCredits,
   fetchDetails,
+  fetchReviews,
   fetchVideos,
   imagePath,
   imagePathOriginal,
@@ -53,6 +54,8 @@ const DetailsPage = () => {
   const [cast, setCast] = useState([]);
   const [video, setVideo] = useState(null);
   const [videos, setVideos] = useState([]);
+  const [reviews, setReviews] = useState([]);
+  const [newReviewText, setNewReviewText] = useState("");
   const [loading, setLoading] = useState(true);
   const [isInWatchlist, setIsInWatchlist] = useState(false);
 
@@ -144,11 +147,13 @@ const DetailsPage = () => {
     const fetchData = async () => {
       setLoading(true);
       try {
-        const [detailsData, creditsData, videosData] = await Promise.all([
-          fetchDetails(type, id),
-          fetchCredits(type, id),
-          fetchVideos(type, id),
-        ]);
+        const [detailsData, creditsData, videosData, reviewsData] =
+          await Promise.all([
+            fetchDetails(type, id),
+            fetchCredits(type, id),
+            fetchVideos(type, id),
+            fetchReviews(id),
+          ]);
 
         setDetails(detailsData);
         setCast(creditsData?.cast?.slice(0, 10));
@@ -160,6 +165,7 @@ const DetailsPage = () => {
           ?.filter((video) => video?.type !== "Trailer")
           ?.slice(0, 10);
         setVideos(videos);
+        setReviews(reviewsData);
 
         if (user) {
           const watchlistStatus = await checkIfInWatchlist(id, token);
@@ -174,6 +180,44 @@ const DetailsPage = () => {
 
     fetchData();
   }, [type, id, user, token]);
+
+  const handleReviewSubmit = async () => {
+    if (!user) {
+      toast({
+        title: "Please login to submit a review",
+        status: "error",
+        isClosable: true,
+      });
+      return;
+    }
+
+    if (!newReviewText.trim()) {
+      toast({
+        title: "Review text cannot be empty",
+        status: "warning",
+        isClosable: true,
+      });
+      return;
+    }
+
+    try {
+      const addedReview = await submitReview(id, newReviewText, token);
+      setReviews((prevReviews) => [addedReview, ...prevReviews]);
+      setNewReviewText("");
+      toast({
+        title: "Review submitted successfully",
+        status: "success",
+        isClosable: true,
+      });
+    } catch (error) {
+      const errorMessage = error.message || "An error occurred";
+      toast({
+        title: errorMessage,
+        status: "error",
+        isClosable: true,
+      });
+    }
+  };
 
   console.log(cast, "cast");
   console.log(video, "video");
@@ -357,6 +401,53 @@ const DetailsPage = () => {
           Videos
         </Heading>
         <VideoComponent id={video?.key} small={false} />
+
+        <Heading
+          as={"h2"}
+          fontSize={"md"}
+          textTransform={"uppercase"}
+          mt={"10"}
+          mb={"5"}
+        >
+          Reviews
+        </Heading>
+
+        {/* Add pagination */}
+        {reviews.length === 0 ? (
+          <Text>No reviews yet. Be the first to write one!</Text>
+        ) : (
+          reviews.map((review) => (
+            <Box key={review.id} mb={4} p={4} bg="gray.700" borderRadius="md">
+              <Text fontWeight="bold" color="white">
+                {review.user.username}
+              </Text>
+              <Text fontSize="sm" color="gray.400">
+                {new Date(review.created_at).toLocaleString()}
+              </Text>
+              <Text mt={2} color="white">
+                {review.review}
+              </Text>
+            </Box>
+          ))
+        )}
+
+        {/* Write a Review */}
+        <Box mt={6}>
+          <FormControl>
+            <FormLabel color={"white"}>Write a Review</FormLabel>
+            <Textarea
+              value={newReviewText}
+              onChange={(e) => setNewReviewText(e.target.value)}
+              placeholder="Share your thoughts about this film..."
+              bg="gray.800"
+              color="white"
+              mb={2}
+            />
+          </FormControl>
+          <Button colorScheme="teal" onClick={handleReviewSubmit}>
+            Submit Review
+          </Button>
+        </Box>
       </Container>
     </Box>
   );

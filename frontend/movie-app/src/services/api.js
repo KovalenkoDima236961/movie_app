@@ -126,3 +126,27 @@ export const getWatchlist = async (token) => {
     throw error;
   }
 };
+
+export const fetchReviews = async (filmId) => {
+  try {
+    const res = await axios.get(`${backendUrl}/reviews/${filmId}`);
+    return res.data;
+  } catch (error) {
+    throw error.response.data;
+  }
+};
+
+export const submitReview = async (filmId, reviewText, token) => {
+  try {
+    const res = await axios.post(
+      `${backendUrl}/reviews/add`,
+      { filmId, reviewText },
+      {
+        headers: { Authorization: `Bearer ${token}` },
+      }
+    );
+    return res.data;
+  } catch (error) {
+    throw error.response.data;
+  }
+};

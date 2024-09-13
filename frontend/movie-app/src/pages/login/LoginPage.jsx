@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import { useGoogleLogin } from "@react-oauth/google";
 import {
   Box,
   Button,
@@ -23,6 +24,16 @@ const LoginPage = () => {
   const isAuthenticated = useSelector((state) => state.auth.isAuthenticated);
   const [errorMessage, setErrorMessage] = useState("");
   const [successMessage, setSuccessMessage] = useState(false);
+
+  const login = useGoogleLogin({
+    onSuccess: (tokenResponse) => {
+      // Dispatch googleLogin action with the credential
+      dispatch(googleLogin(tokenResponse.access_token));
+    },
+    onError: () => {
+      console.log("Google login failed");
+    },
+  });
 
   const handleSignup = (values, { setSubmitting }) => {
     dispatch(signup(values.username, values.email, values.password))
@@ -243,17 +254,16 @@ const LoginPage = () => {
                       Sign In
                     </Button>
                     {/* Custom Google login button placeholder before actual Google button is loaded */}
-                    <Button
-                      mt={4}
-                      colorScheme="red"
-                      w={"full"}
-                      onClick={() => {
-                        window.location.href =
-                          "http://localhost:8080/oauth2/authorization/google";
-                      }}
-                    >
-                      Continue with Google
-                    </Button>
+                    <Box>
+                      <Button
+                        mt={4}
+                        colorScheme="red"
+                        w="full"
+                        onClick={() => login()} // Manually trigger Google login when button is clicked
+                      >
+                        Continue with Google
+                      </Button>
+                    </Box>
                   </Form>
                 )}
               </Formik>
@@ -327,14 +337,6 @@ const LoginPage = () => {
                 <Text>
                   Enter your personal data and start your journey with us!
                 </Text>
-                <Button
-                  mt={4}
-                  colorScheme="red"
-                  w={"full"}
-                  onClick={handleGoogleLogin} // Trigger Google login on button click
-                >
-                  Sign Up
-                </Button>
               </Stack>
             </Box>
           </Box>

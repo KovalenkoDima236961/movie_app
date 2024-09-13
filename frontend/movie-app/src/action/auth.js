@@ -109,6 +109,36 @@ export const login = (email, password) => async (dispatch) => {
   }
 };
 
+export const googleLogin = (googleToken) => async (dispatch) => {
+  const config = {
+    headers: {
+      "Content-Type": "application/json",
+    },
+  };
+
+  const body = JSON.stringify({ token: googleToken });
+
+  try {
+    const res = await axios.post(
+      "http://localhost:8080/auth/google",
+      body,
+      config
+    );
+
+    dispatch({
+      type: GOOGLE_AUTH_SUCCESS,
+      payload: res.data,
+    });
+
+    dispatch(load_user());
+  } catch (err) {
+    dispatch({
+      type: GOOGLE_AUTH_FAIL,
+      payload: err.response ? err.response.data.message : "Google login failed",
+    });
+  }
+};
+
 // change path
 export const checkAuthenticated = () => async (dispatch) => {
   const token = localStorage.getItem("token");
