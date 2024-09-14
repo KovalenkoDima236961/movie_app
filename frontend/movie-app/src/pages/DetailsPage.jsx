@@ -13,6 +13,9 @@ import {
   Text,
   Badge,
   useToast,
+  FormControl,
+  FormLabel,
+  Textarea,
 } from "@chakra-ui/react";
 import {
   addToWatchlist,
@@ -80,7 +83,7 @@ const DetailsPage = () => {
     };
 
     console.log(data);
-
+    console.log(reviews, "reviews");
     try {
       await addToWatchlist(data, token);
       setIsInWatchlist(true);
@@ -165,6 +168,7 @@ const DetailsPage = () => {
           ?.filter((video) => video?.type !== "Trailer")
           ?.slice(0, 10);
         setVideos(videos);
+        console.log(reviews);
         setReviews(reviewsData);
 
         if (user) {
@@ -408,13 +412,16 @@ const DetailsPage = () => {
           textTransform={"uppercase"}
           mt={"10"}
           mb={"5"}
+          color={"white"}
         >
           Reviews
         </Heading>
 
         {/* Add pagination */}
-        {reviews.length === 0 ? (
-          <Text>No reviews yet. Be the first to write one!</Text>
+        {Array.isArray(reviews) && reviews.length === 0 ? (
+          <Text color={"white"}>
+            No reviews yet. Be the first to write one!
+          </Text>
         ) : (
           reviews.map((review) => (
             <Box key={review.id} mb={4} p={4} bg="gray.700" borderRadius="md">

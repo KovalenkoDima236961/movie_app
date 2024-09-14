@@ -14,6 +14,7 @@ import { AuthProvider } from "./context/authProvider.jsx";
 import Watchlist from "./pages/Watchlist.jsx";
 import Protected from "./components/routes/Protected.jsx";
 import LoginPage from "./pages/login/LoginPage.jsx";
+import { GoogleOAuthProvider } from "@react-oauth/google";
 import store from "./store.js";
 import { Provider } from "react-redux";
 import VerifyPage from "./pages/VerifyPage.jsx";
@@ -73,15 +74,19 @@ const router = createBrowserRouter([
   },
 ]);
 
+const clientId = import.meta.env.VITE_GOOGLE_CLIENT_ID;
+
 createRoot(document.getElementById("root")).render(
   <StrictMode>
-    <ColorModeScript initialColorMode={theme.config.initialColorMode} />
-    <ChakraProvider theme={theme}>
-      <Provider store={store}>
-        <AuthProvider>
-          <RouterProvider router={router} />
-        </AuthProvider>
-      </Provider>
-    </ChakraProvider>
+    <GoogleOAuthProvider clientId={clientId}>
+      <ColorModeScript initialColorMode={theme.config.initialColorMode} />
+      <ChakraProvider theme={theme}>
+        <Provider store={store}>
+          <AuthProvider>
+            <RouterProvider router={router} />
+          </AuthProvider>
+        </Provider>
+      </ChakraProvider>
+    </GoogleOAuthProvider>
   </StrictMode>
 );

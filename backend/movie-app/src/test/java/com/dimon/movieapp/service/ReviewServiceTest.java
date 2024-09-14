@@ -21,7 +21,6 @@ import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 @SpringBootTest
-@Sql(scripts = "/data.sql")
 public class ReviewServiceTest {
 
     @Autowired
@@ -36,6 +35,7 @@ public class ReviewServiceTest {
     @Autowired
     private LocalUserRepository userRepository;
 
+    // TODO Here i have problem with user id it thrown for me exception Not Found User
     @Test
     public void testAddReview_Success() {
         // Given

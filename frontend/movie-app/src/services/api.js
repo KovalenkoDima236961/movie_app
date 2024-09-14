@@ -3,12 +3,13 @@ import axios from "axios";
 export const imagePath = "https://image.tmdb.org/t/p/w500";
 export const imagePathOriginal = "https://image.tmdb.org/t/p/original";
 
-const baseUrl = import.meta.env.BASE_URL;
+const baseUrl = "https://api.themoviedb.org/3";
 const apiKey = import.meta.env.VITE_API_KEY;
 
 const backendUrl = import.meta.env.BACKEND_URL;
 // TRENDING
 export const fetchTrending = async (timeWindow = "day") => {
+  console.log(baseUrl);
   const { data } = await axios.get(
     `${baseUrl}/trending/all/${timeWindow}?api_key=${apiKey}`
   );
@@ -128,11 +129,16 @@ export const getWatchlist = async (token) => {
 };
 
 export const fetchReviews = async (filmId) => {
+  console.log("Fetching reviews for film ID:", filmId);
   try {
-    const res = await axios.get(`${backendUrl}/reviews/${filmId}`);
-    return res.data;
+    const res = await axios.get(`http://localhost:8080/reviews/${filmId}`);
+    return res.data; // This will return an empty array if no reviews exist
   } catch (error) {
-    throw error.response.data;
+    if (error.response && error.response.status === 404) {
+      console.log("No reviews found for this film.");
+      return []; // Return an empty array if no reviews are found
+    }
+    throw error.response.data; // Throw other errors
   }
 };
 
