@@ -20,7 +20,7 @@
     <li><strong>Authentication:</strong> JWT (JSON Web Tokens) and Google OAuth 2.0</li>
     <li><strong>Testing:</strong> JUnit for backend testing</li>
     <li><strong>Containerization:</strong> Docker</li>
-    <li><strong>CI/CD Pipeline:</strong> Basic setup for continuous integration and deployment</li>
+    <li><strong>CI/CD Pipeline(Jenkins):</strong> Basic setup for continuous integration and deployment</li>
 </ul>
 
 <h2>Usage</h2>
