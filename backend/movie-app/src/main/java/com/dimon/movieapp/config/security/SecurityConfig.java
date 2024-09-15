@@ -50,6 +50,7 @@ public class SecurityConfig {
         return http.build();
     }
 
+    // CORS PROBLEM
     @Bean
     public WebMvcConfigurer corsConfigurer () {
         return new WebMvcConfigurer() {

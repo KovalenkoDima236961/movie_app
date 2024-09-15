@@ -25,13 +25,13 @@ const LoginPage = () => {
   const [errorMessage, setErrorMessage] = useState("");
   const [successMessage, setSuccessMessage] = useState(false);
 
-  const login = useGoogleLogin({
+  const googleLoginHandler = useGoogleLogin({
     onSuccess: (tokenResponse) => {
-      // Dispatch googleLogin action with the credential
+      // Dispatch Google login token to Redux or your backend
       dispatch(googleLogin(tokenResponse.access_token));
     },
     onError: () => {
-      console.log("Google login failed");
+      setErrorMessage("Google login failed. Please try again.");
     },
   });
 
@@ -55,9 +55,6 @@ const LoginPage = () => {
       })
       .finally(() => setSubmitting(false));
   };
-
-  // Handle Google Login by dispatching googleLogin action
-  const handleGoogleLogin = () => {};
 
   const handleLogin = (values, { setSubmitting }) => {
     dispatch(login(values.email, values.password))
@@ -242,7 +239,7 @@ const LoginPage = () => {
                       to="/forgot-password"
                       style={{ marginBottom: "16px", display: "block" }}
                     >
-                      Forgot your password
+                      Forgot your password?
                     </Link>
 
                     <Button
@@ -253,20 +250,16 @@ const LoginPage = () => {
                     >
                       Sign In
                     </Button>
-                    {/* Custom Google login button placeholder before actual Google button is loaded */}
-                    <Box>
-                      <Button
-                        mt={4}
-                        colorScheme="red"
-                        w="full"
-                        onClick={() => login()} // Manually trigger Google login when button is clicked
-                      >
-                        Continue with Google
-                      </Button>
-                    </Box>
                   </Form>
                 )}
               </Formik>
+
+              {/* Google OAuth Login Button */}
+              <Box mt={4}>
+                <Button colorScheme="red" w="full" onClick={googleLoginHandler}>
+                  Continue with Google
+                </Button>
+              </Box>
             </Container>
           </Box>
         )}
@@ -337,6 +330,13 @@ const LoginPage = () => {
                 <Text>
                   Enter your personal data and start your journey with us!
                 </Text>
+                <Button
+                  variant={"outline"}
+                  colorScheme="whiteAlpha"
+                  onClick={() => setSignIn(false)}
+                >
+                  Sign Up
+                </Button>
               </Stack>
             </Box>
           </Box>

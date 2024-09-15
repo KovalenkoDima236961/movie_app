@@ -80,6 +80,7 @@ export const signup = (username, email, password) => async (dispatch) => {
 };
 
 export const login = (email, password) => async (dispatch) => {
+  console.log("Login");
   const config = {
     headers: {
       "Content-Type": "application/json",

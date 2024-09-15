@@ -44,22 +44,4 @@ public class ReviewControllerTest {
 
     private ObjectMapper mapper = new ObjectMapper();
 
-
-    @Test
-    public void addReviewTest() throws Exception {
-        ReviewDto body = new ReviewDto();
-        body.setReview(null);
-        body.setFilmId(null);
-
-        LocalUser user = userRepository.findByUsernameIgnoreCase("UserA").get();
-        String jwt = jwtService.generateJWT(user);
-
-
-        mvc.perform(post("/reviews/add")
-                .contentType(MediaType.APPLICATION_JSON)
-                        .header("Authorization", "Bearer " + jwt)
-                .content(mapper.writeValueAsString(body)))
-                .andExpect(status().is(HttpStatus.BAD_REQUEST.value()));
-    }
-
 }

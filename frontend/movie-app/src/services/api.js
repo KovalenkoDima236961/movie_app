@@ -145,7 +145,7 @@ export const fetchReviews = async (filmId) => {
 export const submitReview = async (filmId, reviewText, token) => {
   try {
     const res = await axios.post(
-      `${backendUrl}/reviews/add`,
+      `http://localhost:8080/reviews/add`,
       { filmId, reviewText },
       {
         headers: { Authorization: `Bearer ${token}` },

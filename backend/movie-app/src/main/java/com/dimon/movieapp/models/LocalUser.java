@@ -53,7 +53,7 @@ public class LocalUser implements UserDetails {
     private Set<FilmEntity> watchlist = new HashSet<>();
 
 
-    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
     private List<Review> reviews;
 
     public void addFilmToWatchlist(FilmEntity film) {
